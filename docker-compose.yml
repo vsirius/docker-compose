@@ -1,0 +1,34 @@
+version: '2.1'
+services:
+  application-db:
+    image: siriusgti/mysql-db 
+    ports:
+     - "3306:3306"
+    volumes:
+     - /home/ubuntu/mysql/8.0/sql:/docker-entrypoint-initdb.d
+    environment:
+       MYSQL_USER: "app"
+       MYSQL_PASSWORD: "Ws0823~LL" 
+       MYSQL_DATABASE: "application" 
+       MYSQL_RANDOM_ROOT_PASSWORD: "yes" 
+    healthcheck:
+      test: "exit 0"
+  
+  application-python-server:
+    image: siriusgti/python-app
+    ports:
+      - "80:80"
+    links:
+      - application-db
+    depends_on:
+       application-db:
+           condition: service_healthy
+  
+  nodejs-app:
+    image: siriusgti/nodejs
+    links:
+      - application-db
+    depends_on:
+       application-python-server:
+            condition: service_started
+
